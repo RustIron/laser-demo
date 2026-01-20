@@ -1,0 +1,113 @@
+{
+  "description": "Test sequence for chip measurement",
+  "metadata": {
+    "created_at": 1640995200.0,
+    "created_by": "user",
+    "batch_id": "test_seq_001"
+  },
+  "commands": [
+    {
+      "command_id": "HM0001",
+      "command_type": "HOME",
+      "target_stage": null,
+      "execution": {
+        "mode": "immediate"
+      }
+    },
+    {
+      "command_id": "CH0001",
+      "command_type": "LOAD_CHIP",
+      "target_stage": "three_axis_gantry",
+      "parameters": {
+        "source_position": {
+          "position": {
+            "x": -50000,
+            "y": -50000,
+            "z": 30000
+          }
+        },
+        "destination_position": {
+          "position": {
+            "x": 0,
+            "y": 0,
+            "z": 10000
+          }
+        }
+      },
+      "execution": {
+        "mode": "queued",
+        "priority": 8
+      }
+    },
+    {
+      "command_id": "ST0002",
+      "command_type": "MOVE",
+      "target_stage": "six_axis",
+      "parameters": {
+        "position": {
+          "position": {
+            "x": 0,
+            "y": 0,
+            "z": 500,
+            "rotation": {
+              "rx": 0.0,
+              "ry": 0.0,
+              "rz": 0.0
+            }
+          },
+          "velocity": 25000,
+          "acceleration": 250000
+        },
+        "execution": {
+          "mode": "queued",
+          "priority": 6
+        }
+      }
+    },
+    {
+      "command_id": "PR0001",
+      "command_type": "PRESS_PROBE",
+      "target_stage": "probe_stage",
+      "parameters": {
+        "target_z": -2000,
+        "max_force": 500
+      },
+      "execution": {
+        "mode": "queued",
+        "priority": 7
+      }
+    },
+    {
+      "command_id": "GT0003",
+      "command_type": "GET_STATUS",
+      "execution": {
+        "mode": "immediate"
+      }
+    },
+    {
+      "command_id": "PR0002",
+      "command_type": "RETRACT_PROBE",
+      "target_stage": "probe_stage",
+      "execution": {
+        "mode": "immediate"
+      }
+    },
+    {
+      "command_id": "CH0002",
+      "command_type": "UNLOAD_CHIP",
+      "target_stage": "three_axis_gantry",
+      "execution": {
+        "mode": "queued",
+        "priority": 8
+      }
+    },
+    {
+      "command_id": "HM0004",
+      "command_type": "HOME",
+      "target_stage": null,
+      "execution": {
+        "mode": "immediate"
+      }
+    }
+  ]
+}

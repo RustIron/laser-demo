@@ -1,0 +1,342 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Laser Diode Test Equipment Command Schema",
+  "description": "Schema for validating JSON commands sent to the test equipment simulation",
+
+  "definitions": {
+    "vector3d": {
+      "type": "object",
+      "description": "3D position vector in microns (1 micron = 0.001 mm)",
+      "properties": {
+        "x": {
+          "type": "number",
+          "unit": "microns",
+          "description": "X coordinate in microns"
+        },
+        "y": {
+          "type": "number",
+          "unit": "microns",
+          "description": "Y coordinate in microns"
+        },
+        "z": {
+          "type": "number",
+          "unit": "microns",
+          "description": "Z coordinate in microns"
+        }
+      },
+      "required": ["x", "y", "z"]
+    },
+
+    "rotation3d": {
+      "type": "object",
+      "description": "3D rotation vector in degrees",
+      "properties": {
+        "rx": {
+          "type": "number",
+          "unit": "degrees",
+          "description": "Rotation around X axis"
+        },
+        "ry": {
+          "type": "number",
+          "unit": "degrees",
+          "description": "Rotation around Y axis"
+        },
+        "rz": {
+          "type": "number",
+          "unit": "degrees",
+          "description": "Rotation around Z axis"
+        }
+      }
+    },
+
+    "position": {
+      "type": "object",
+      "description": "Complete position with optional rotation",
+      "properties": {
+        "position": {
+          "$ref": "#/definitions/vector3d"
+        },
+        "rotation": {
+          "$ref": "#/definitions/rotation3d"
+        }
+      },
+      "required": ["position"]
+    },
+
+    "motion_params": {
+      "type": "object",
+      "description": "Motion parameters for movement commands",
+      "properties": {
+        "velocity": {
+          "type": "number",
+          "minimum": 0,
+          "unit": "microns/s",
+          "description": "Maximum velocity in microns per second"
+        },
+        "acceleration": {
+          "type": "number",
+          "minimum": 0,
+          "unit": "microns/s²",
+          "description": "Maximum acceleration in microns per second squared"
+        }
+      }
+    },
+
+    "execution_params": {
+      "type": "object",
+      "description": "Command execution parameters",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["immediate", "queued"],
+          "default": "immediate",
+          "description": "Execution mode - immediate bypasses queue, queued adds to command queue"
+        },
+        "priority": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10,
+          "default": 5,
+          "description": "Command priority for queued execution (1=lowest, 10=highest)"
+        },
+        "timeout": {
+          "type": "number",
+          "minimum": 0,
+          "unit": "seconds",
+          "description": "Command timeout in seconds (0=no timeout)"
+        }
+      }
+    }
+  },
+
+  "type": "object",
+  "properties": {
+    "command_id": {
+      "type": "string",
+      "pattern": "^[A-Z]{2}[0-9]{4}$",
+      "description": "Unique command identifier (format: 2 letters + 4 digits)"
+    },
+
+    "command_type": {
+      "type": "string",
+      "enum": [
+        "MOVE",
+        "HOME",
+        "PRESS_PROBE",
+        "RETRACT_PROBE",
+        "LOAD_CHIP",
+        "UNLOAD_CHIP",
+        "GET_STATUS",
+        "GET_POSITION",
+        "EMERGENCY_STOP",
+        "RESET_EMERGENCY_STOP"
+      ],
+      "description": "Type of command to execute"
+    },
+
+    "target_stage": {
+      "type": "string",
+      "enum": [
+        "six_axis",
+        "three_axis_gantry",
+        "probe_stage",
+        null
+      ],
+      "description": "Target stage for the command (null for broadcast commands)"
+    },
+
+    "parameters": {
+      "type": "object",
+      "description": "Command-specific parameters",
+      "properties": {
+        "position": {
+          "$ref": "#/definitions/position",
+          "description": "Target position for MOVE command"
+        },
+        "target_z": {
+          "type": "number",
+          "unit": "microns",
+          "description": "Target Z position for PRESS_PROBE command"
+        },
+        "max_force": {
+          "type": "number",
+          "minimum": 0,
+          "unit": "force_units",
+          "description": "Maximum force limit for PRESS_PROBE command"
+        },
+        "source_position": {
+          "$ref": "#/definitions/position",
+          "description": "Source position for LOAD_CHIP command"
+        },
+        "destination_position": {
+          "$ref": "#/definitions/position",
+          "description": "Destination position for LOAD_CHIP command"
+        }
+      }
+    },
+
+    "execution": {
+      "$ref": "#/definitions/execution_params",
+      "description": "Execution parameters for the command"
+    }
+  },
+
+  "allOf": [
+    {
+      "properties": {
+        "command_id": {},
+        "command_type": {},
+        "execution": {}
+      },
+      "required": ["command_id", "command_type"]
+    },
+    {
+      "if": {
+        "properties": {
+          "command_type": {
+            "const": "MOVE"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "target_stage": {
+            "enum": ["six_axis", "three_axis_gantry", "probe_stage"]
+          },
+          "parameters": {
+            "properties": {
+              "position": {},
+              "velocity": {},
+              "acceleration": {}
+            },
+            "required": ["position"]
+          }
+        },
+        "required": ["target_stage", "parameters"]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "command_type": {
+            "const": "HOME"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "target_stage": {
+            "enum": ["six_axis", "three_axis_gantry", "probe_stage", null]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "command_type": {
+            "const": "PRESS_PROBE"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "parameters": {
+            "properties": {
+              "target_z": {},
+              "max_force": {}
+            },
+            "required": ["target_z"]
+          }
+        },
+        "required": ["parameters"]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "command_type": {
+            "const": "LOAD_CHIP"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "parameters": {
+            "properties": {
+              "source_position": {},
+              "destination_position": {}
+            },
+            "required": ["source_position", "destination_position"]
+          }
+        },
+        "required": ["parameters"]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "command_type": {
+            "const": "GET_POSITION"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "target_stage": {
+            "enum": ["six_axis", "three_axis_gantry", "probe_stage"]
+          }
+        },
+        "required": ["target_stage"]
+      }
+    }
+  ],
+
+  "examples": [
+    {
+      "command_id": "ST0001",
+      "command_type": "MOVE",
+      "target_stage": "six_axis",
+      "parameters": {
+        "position": {
+          "x": 10500,
+          "y": 5200,
+          "z": 100,
+          "rotation": {
+            "rx": 0.0,
+            "ry": 0.0,
+            "rz": 45.0
+          }
+        },
+        "velocity": 50000,
+        "acceleration": 500000
+      },
+      "execution": {
+        "mode": "immediate",
+        "priority": 5,
+        "timeout": 30.0
+      }
+    },
+    {
+      "command_id": "ST0002",
+      "command_type": "PRESS_PROBE",
+      "target_stage": "probe_stage",
+      "parameters": {
+        "target_z": -5000,
+        "max_force": 800
+      },
+      "execution": {
+        "mode": "queued",
+        "priority": 7
+      }
+    },
+    {
+      "command_id": "ST0003",
+      "command_type": "HOME",
+      "target_stage": null,
+      "execution": {
+        "mode": "immediate"
+      }
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "version": "1.0",
+  "last_updated": 1640995200.0,
+  "stages": {
+    "six_axis": {
+      "max_velocity": 100000,
+      "max_acceleration": 500000,
+      "max_jerk": 10000000,
+      "position_tolerance": 0.1,
+      "velocity_tolerance": 10.0,
+      "enabled": true
+    },
+    "three_axis_gantry": {
+      "max_velocity": 200000,
+      "max_acceleration": 1000000,
+      "max_jerk": 20000000,
+      "position_tolerance": 0.5,
+      "velocity_tolerance": 20.0,
+      "enabled": true
+    },
+    "probe_stage": {
+      "max_velocity": 50000,
+      "max_acceleration": 250000,
+      "max_jerk": 5000000,
+      "position_tolerance": 0.01,
+      "velocity_tolerance": 1.0,
+      "enabled": true
+    }
+  },
+  "gui": {
+    "window_width": 1400,
+    "window_height": 900,
+    "window_x": 100,
+    "window_y": 100,
+    "theme": "default",
+    "font_size": 10,
+    "update_interval": 50,
+    "show_position_trail": true,
+    "trail_length": 100,
+    "auto_rotate_3d": false,
+    "rotation_speed": 1.0,
+    "camera_distance": 200000
+  },
+  "safety": {
+    "min_clearance": 1000.0,
+    "prediction_time": 2.0,
+    "auto_emergency_stop": true,
+    "warning_distance": 2000.0,
+    "force_limit_probe": 1000.0
+  }
+}

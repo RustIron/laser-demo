@@ -1,0 +1,70 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "安装依赖",
+            "type": "shell",
+            "command": "pip",
+            "args": [
+                "install",
+                "-r",
+                "requirements.txt"
+            ],
+            "problemMatcher": [],
+            "group": "build",
+            "detail": "安装项目依赖包"
+        },
+        {
+            "label": "运行应用",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "main.py"
+            ],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "启动激光二极管测试设备仿真环境"
+        },
+        {
+            "label": "运行测试",
+            "type": "shell",
+            "command": "pytest",
+            "args": [
+                "tests/",
+                "-v"
+            ],
+            "problemMatcher": [],
+            "group": "test",
+            "detail": "运行所有单元测试"
+        },
+        {
+            "label": "代码格式化",
+            "type": "shell",
+            "command": "black",
+            "args": [
+                ".",
+                "--line-length",
+                "100"
+            ],
+            "problemMatcher": [],
+            "group": "build",
+            "detail": "使用Black格式化代码"
+        },
+        {
+            "label": "代码检查",
+            "type": "shell",
+            "command": "pylint",
+            "args": [
+                "core/",
+                "gui/",
+                "config/"
+            ],
+            "problemMatcher": [],
+            "group": "build",
+            "detail": "使用Pylint检查代码质量"
+        }
+    ]
+}
